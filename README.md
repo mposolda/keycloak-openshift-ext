@@ -12,3 +12,9 @@ mvn clean package
 cp target/openshift-ext-1.0-SNAPSHOT.jar $KEYCLOAK_HOME/providers/
 cp target/lib/*.jar $KEYCLOAK_HOME/providers/
 ```
+
+## TODO
+
+* Clean-up dependencies
+* Clean-up how to deploy to Keycloak
+* Test, potentially with test containers
