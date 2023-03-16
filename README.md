@@ -4,3 +4,6 @@ Experimental extension to Keycloak that supports replacing the internal OpenShif
 
 * Token review endpoint: custom token introspection endpoint for OpenShift
 * Client federation: ability to federate OAuth clients registered in OpenShift
+
+## Deploying to Keycloak
+
