@@ -7,3 +7,8 @@ Experimental extension to Keycloak that supports replacing the internal OpenShif
 
 ## Deploying to Keycloak
 
+```
+mvn clean package
+cp target/openshift-ext-1.0-SNAPSHOT.jar $KEYCLOAK_HOME/providers/
+cp target/lib/*.jar $KEYCLOAK_HOME/providers/
+```
