@@ -12,19 +12,50 @@
   <url>http://www.example.com</url>
 
   <properties>
-    <keycloak.version>21.0.0</keycloak.version>
+    <!-- TODO: Change this to Keycloak 22 once it is released -->
+    <keycloak.version>999.0.0-SNAPSHOT</keycloak.version>
+
+    <!-- Openshift client and it's dependencies -->
     <openshift-client.version>9.0.5.Final</openshift-client.version>
+    <okhttp.version>4.10.0</okhttp.version>
+    <okiojvm.version>3.0.0</okiojvm.version>
+    <jbossdmr.version>1.5.1.Final</jbossdmr.version>
+    <commonscompress.version>1.21</commonscompress.version>
+    <commonslang.version>2.6</commonslang.version>
+    <kotlin.version>1.8.10</kotlin.version>
+
+    <!-- Test deps -->
+    <selenium.version>2.27</selenium.version>
+    <surefire-plugin.version>2.12.4</surefire-plugin.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+    <dependency>
+      <groupId>org.keycloak.bom</groupId>
+      <artifactId>keycloak-misc-bom</artifactId>
+      <version>${keycloak.version}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-dependencies-server-all</artifactId>
+      <version>${keycloak.version}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-common</artifactId>
-      <version>${keycloak.version}</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -36,7 +67,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-core</artifactId>
-      <version>${keycloak.version}</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -48,7 +78,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi</artifactId>
-      <version>${keycloak.version}</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -60,7 +89,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-model-legacy</artifactId>
-      <version>${keycloak.version}</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -72,7 +100,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>2.14.2</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -84,7 +111,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.14.2</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -96,7 +122,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-model-legacy-private</artifactId>
-      <version>${keycloak.version}</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -108,7 +133,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi-private</artifactId>
-      <version>${keycloak.version}</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -120,7 +144,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-services</artifactId>
-      <version>${keycloak.version}</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -130,10 +153,8 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-      <version>1.0.1.Final</version>
-      <scope>provided</scope>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
     </dependency>
     <dependency>
       <groupId>com.openshift</groupId>
@@ -158,6 +179,35 @@
         </exclusion>
       </exclusions>
     </dependency>
+
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-junit5</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.keycloak</groupId>
+      <artifactId>keycloak-test-helper</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.undertow</groupId>
+      <artifactId>undertow-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>htmlunit-driver</artifactId>
+      <version>${selenium.version}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -165,22 +215,70 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.6.0</version>
         <executions>
           <execution>
             <id>copy-dependencies</id>
             <phase>package</phase>
             <goals>
-              <goal>copy-dependencies</goal>
+              <goal>copy</goal>
             </goals>
             <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.openshift</groupId>
+                  <artifactId>openshift-restclient-java</artifactId>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.squareup.okhttp3</groupId>
+                  <artifactId>okhttp</artifactId>
+                  <version>${okhttp.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.squareup.okio</groupId>
+                  <artifactId>okio-jvm</artifactId>
+                  <version>${okiojvm.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.jboss</groupId>
+                  <artifactId>jboss-dmr</artifactId>
+                  <version>${jbossdmr.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.apache.commons</groupId>
+                  <artifactId>commons-compress</artifactId>
+                  <version>${commonscompress.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>commons-lang</groupId>
+                  <artifactId>commons-lang</artifactId>
+                  <version>${commonslang.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.jetbrains.kotlin</groupId>
+                  <artifactId>kotlin-stdlib</artifactId>
+                  <version>${kotlin.version}</version>
+                </artifactItem>
+              </artifactItems>
               <outputDirectory>${project.build.directory}/lib</outputDirectory>
               <overWriteReleases>false</overWriteReleases>
               <overWriteSnapshots>false</overWriteSnapshots>
               <overWriteIfNewer>true</overWriteIfNewer>
-              <excludeScope>provided</excludeScope>
             </configuration>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire-plugin.version}</version>
+        <configuration>
+          <environmentVariables>
+            <!-- Will propagate to embedded Keycloak server and bootstrap user admin/admin (See KeycloakMain class) -->
+            <KEYCLOAK_ADMIN>admin</KEYCLOAK_ADMIN>
+            <KEYCLOAK_ADMIN_PASSWORD>admin</KEYCLOAK_ADMIN_PASSWORD>
+          </environmentVariables>
+        </configuration>
       </plugin>
     </plugins>
   </build>

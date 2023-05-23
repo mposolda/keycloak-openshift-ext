@@ -15,88 +15,81 @@
  * limitations under the License.
  */
 
-package org.keycloak.testsuite.openshift;
+package org.keycloak.test;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import org.jboss.arquillian.graphene.page.Page;
+import jakarta.ws.rs.core.Response;
+//import org.jboss.arquillian.container.test.api.RunAsClient;
+//import org.jboss.arquillian.drone.api.annotation.Drone;
+//import org.jboss.arquillian.graphene.page.Page;
+//import org.jboss.arquillian.junit.Arquillian;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
+//import org.junit.runner.RunWith;
 import org.keycloak.OAuth2Constants;
-import org.keycloak.OAuthErrorException;
 import org.keycloak.admin.client.resource.ComponentResource;
-import org.keycloak.common.Profile.Feature;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.common.util.StreamUtil;
-import org.keycloak.events.Details;
+//import org.keycloak.events.Details;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.ComponentRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.storage.client.ClientStorageProvider;
 import org.keycloak.storage.openshift.OpenshiftClientStorageProviderFactory;
-import org.keycloak.testsuite.AbstractTestRealmKeycloakTest;
-import org.keycloak.testsuite.AssertEvents;
-import org.keycloak.testsuite.ProfileAssume;
-import org.keycloak.testsuite.admin.ApiUtil;
-import org.keycloak.testsuite.arquillian.annotation.EnableFeature;
-import org.keycloak.testsuite.pages.AppPage;
-import org.keycloak.testsuite.pages.ConsentPage;
-import org.keycloak.testsuite.pages.ErrorPage;
-import org.keycloak.testsuite.pages.LoginPage;
-import org.keycloak.testsuite.util.OAuthClient;
+import org.keycloak.test.page.ConsentPage;
+import org.keycloak.test.page.ErrorPage;
+import org.keycloak.test.page.MyLoginPage;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.support.PageFactory;
 
-import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
-import static org.junit.Assert.fail;
-import static org.keycloak.common.Profile.Feature.OPENSHIFT_INTEGRATION;
-import static org.keycloak.testsuite.ProfileAssume.assumeFeatureEnabled;
-import static org.keycloak.testsuite.admin.ApiUtil.findUserByUsername;
-
 /**
- * TODO Refactor to using test containers
  *
  * Test that clients can override auth flows
  *
  * @author <a href="mailto:psilva@redhat.com">Pedro Igor</a>
  */
-@EnableFeature(value = OPENSHIFT_INTEGRATION, skipRestart = true)
-public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakTest {
+//@RunWith(Arquillian.class)
+//@RunAsClient
+public final class OpenshiftClientStorageTest extends AbstractOpenshiftTest {
 
     private static Undertow OPENSHIFT_API_SERVER;
 
-    @Rule
-    public AssertEvents events = new AssertEvents(this);
+    // @Drone
+    protected WebDriver driver;
 
-    @Page
-    private LoginPage loginPage;
+    // @Page
+    private MyLoginPage loginPage;
 
-    @Page
-    private AppPage appPage;
-
-    @Page
+//    @Page
+//    private AppPage appPage;
+//
+//    @Page
     private ConsentPage consentPage;
 
-    @Page
+    // @Page
     private ErrorPage errorPage;
 
     private String userId;
     private String clientStorageId;
 
+    OAuthClient oauth;
+
     @Override
     public void configureTestRealm(RealmRepresentation testRealm) {
-    }
-
-    @BeforeClass
-    public static void checkNotMapStorage() {
-        ProfileAssume.assumeFeatureDisabled(Feature.MAP_STORAGE);
     }
 
     @BeforeClass
@@ -132,7 +125,9 @@ public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakT
             }
 
             private void writeResponse(String file, HttpServerExchange exchange) throws IOException {
-                exchange.getResponseSender().send(StreamUtil.readString(getClass().getResourceAsStream("/openshift/client-storage/" + file)));
+                InputStream is = getClass().getResourceAsStream("/openshift/client-storage/" + file);
+                String response = is == null ? "{}" : StreamUtil.readString(is);
+                exchange.getResponseSender().send(response);
             }
         }).build();
 
@@ -148,7 +143,6 @@ public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakT
 
     @Before
     public void onBefore() {
-        assumeFeatureEnabled(OPENSHIFT_INTEGRATION);
         ComponentRepresentation provider = new ComponentRepresentation();
 
         provider.setName("openshift-client-storage");
@@ -162,13 +156,33 @@ public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakT
 
         Response resp = adminClient.realm("test").components().add(provider);
         resp.close();
-        clientStorageId = ApiUtil.getCreatedId(resp);
-        getCleanup().addComponentId(clientStorageId);
+        clientStorageId = TestsHelper.getCreatedId(resp);
+        userId = TestUtil.findUserByUsername(adminClient.realm("test"), "test-user@localhost").getId();
+
+        // Manually init selenium and pages
+        driver = new HtmlUnitDriver() {
+
+            @Override
+            protected WebClient newWebClient(BrowserVersion version) {
+                WebClient superr = super.newWebClient(version);
+                superr.getOptions().setCssEnabled(false);
+                return superr;
+            }
+
+        };
+        oauth = new OAuthClient();
+        oauth.init(driver);
+        loginPage = new MyLoginPage();
+        PageFactory.initElements(driver, loginPage);
+        errorPage = new ErrorPage();
+        PageFactory.initElements(driver, errorPage);
+        consentPage = new ConsentPage();
+        PageFactory.initElements(driver, consentPage);
     }
 
-    @Before
-    public void clientConfiguration() {
-        userId = findUserByUsername(adminClient.realm("test"), "test-user@localhost").getId();
+    @After
+    public void afterWards() {
+        driver.close();
     }
 
     @Test
@@ -179,7 +193,7 @@ public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakT
 
     @Test
     public void failCodeGrantFlowWithServiceAccountUsingOAuthRedirectReference() throws Exception {
-        testCodeGrantFlow("system:serviceaccount:default:sa-oauth-redirect-reference", "http://invalid/callback", () -> assertEquals(OAuthErrorException.INVALID_REDIRECT_URI, events.poll().getError()));
+        testCodeGrantFlowError("system:serviceaccount:default:sa-oauth-redirect-reference", "http://invalid/callback", null, "Invalid parameter: redirect_uri");
     }
 
     @Test
@@ -206,7 +220,7 @@ public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakT
         representation.getConfig().put(OpenshiftClientStorageProviderFactory.CONFIG_PROPERTY_REQUIRE_USER_CONSENT, Arrays.asList("true"));
         component.update(representation);
 
-        testCodeGrantFlow(clientId, "http://localhost:8180/auth/realms/master/app/auth", () -> assertSuccessfulResponseWithoutConsent(clientId, Details.CONSENT_VALUE_PERSISTED_CONSENT), "user:info user:check-access");
+        testCodeGrantFlow(clientId, "http://localhost:8180/auth/realms/master/app/auth", () -> assertSuccessfulResponseWithoutConsent(clientId), "user:info user:check-access");
 
         testRealm().users().get(userId).revokeConsent(clientId);
 
@@ -215,7 +229,7 @@ public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakT
 
     @Test
     public void failCodeGrantFlowWithServiceAccountUsingOAuthRedirectUri() throws Exception {
-        testCodeGrantFlow("system:serviceaccount:default:sa-oauth-redirect-uri", "http://invalid/callback", () -> assertEquals(OAuthErrorException.INVALID_REDIRECT_URI, events.poll().getError()));
+        testCodeGrantFlowError("system:serviceaccount:default:sa-oauth-redirect-uri", "http://invalid/callback", null, "Invalid parameter: redirect_uri");
     }
 
     private void testCodeGrantFlow(String clientId, String expectedRedirectUri, Runnable assertThat) {
@@ -229,7 +243,7 @@ public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakT
         oauth.clientId(clientId);
         oauth.redirectUri(expectedRedirectUri);
         driver.navigate().to(oauth.getLoginFormUrl());
-        loginPage.assertCurrent();
+        Assert.assertTrue(loginPage.isCurrent(driver));
 
         try {
             // Fill username+password. I am successfully authenticated
@@ -241,27 +255,38 @@ public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakT
         assertThat.run();
     }
 
+    private void testCodeGrantFlowError(String clientId, String expectedRedirectUri, String scope, String expectedError) {
+        if (scope != null) {
+            oauth.scope(scope);
+        }
+        oauth.clientId(clientId);
+        oauth.redirectUri(expectedRedirectUri);
+        driver.navigate().to(oauth.getLoginFormUrl());
+        Assert.assertTrue(errorPage.isCurrent(driver));
+        Assert.assertEquals(expectedError, errorPage.getError());
+    }
+
     private void assertSuccessfulResponseWithoutConsent(String clientId) {
         assertSuccessfulResponseWithoutConsent(clientId, null);
     }
 
     private void assertSuccessfulResponseWithoutConsent(String clientId, String consentDetail) {
-        AssertEvents.ExpectedEvent expectedEvent = events.expectLogin().client(clientId).detail(Details.REDIRECT_URI, oauth.getRedirectUri()).detail(Details.USERNAME, "test-user@localhost");
-
-        if (consentDetail != null) {
-            expectedEvent.detail(Details.CONSENT, Details.CONSENT_VALUE_PERSISTED_CONSENT);
-        }
-
-        expectedEvent.assertEvent();
+//        AssertEvents.ExpectedEvent expectedEvent = events.expectLogin().client(clientId).detail(Details.REDIRECT_URI, oauth.getRedirectUri()).detail(Details.USERNAME, "test-user@localhost");
+//
+//        if (consentDetail != null) {
+//            expectedEvent.detail(Details.CONSENT, Details.CONSENT_VALUE_PERSISTED_CONSENT);
+//        }
+//
+//        expectedEvent.assertEvent();
         assertSuccessfulRedirect();
     }
 
     private void assertSuccessfulResponseWithConsent(String clientId) {
-        consentPage.assertCurrent();
+        Assert.assertTrue(consentPage.isCurrent(driver));
         driver.getPageSource().contains("user:info");
         driver.getPageSource().contains("user:check-access");
         consentPage.confirm();
-        events.expectLogin().client(clientId).detail(Details.REDIRECT_URI, oauth.getRedirectUri()).detail(Details.USERNAME, "test-user@localhost").detail(Details.CONSENT, Details.CONSENT_VALUE_CONSENT_GRANTED).assertEvent();
+        //events.expectLogin().client(clientId).detail(Details.REDIRECT_URI, oauth.getRedirectUri()).detail(Details.USERNAME, "test-user@localhost").detail(Details.CONSENT, Details.CONSENT_VALUE_CONSENT_GRANTED).assertEvent();
         assertSuccessfulRedirect("user:info", "user:check-access");
     }
 
@@ -278,12 +303,12 @@ public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakT
                 token.getScope().contains(expectedScope);
             }
         } catch (Exception e) {
-            fail("Failed to parse access token");
+            Assert.fail("Failed to parse access token");
             e.printStackTrace();
         }
 
         Assert.assertNotNull(tokenResponse.getRefreshToken());
         oauth.doLogout(tokenResponse.getRefreshToken(), null);
-        events.clear();
+        //events.clear();
     }
 }

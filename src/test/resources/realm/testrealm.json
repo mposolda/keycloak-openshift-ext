@@ -1,0 +1,215 @@
+{
+  "id": "test",
+  "realm": "test",
+  "enabled": true,
+  "sslRequired": "external",
+  "defaultRoles": [ "user" ],
+  "users" : [
+    {
+      "username" : "test-user@localhost",
+      "enabled": true,
+      "email" : "test-user@localhost",
+      "firstName": "Tom",
+      "lastName": "Brady",
+      "credentials" : [
+        { "type" : "password",
+          "value" : "password" }
+      ],
+      "realmRoles": ["user", "offline_access"],
+      "clientRoles": {
+        "test-app": [ "customer-user" ],
+        "account": [ "view-profile", "manage-account" ]
+      }
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "test-app",
+      "enabled": true,
+      "baseUrl": "http://localhost:8180/auth/realms/master/app/auth",
+      "redirectUris": [
+        "http://localhost:8180/auth/realms/master/app/auth/*",
+        "https://localhost:8543/auth/realms/master/app/auth/*",
+        "http://localhost:8180/auth/realms/test/app/auth/*",
+        "https://localhost:8543/auth/realms/test/app/auth/*"
+      ],
+      "adminUrl": "http://localhost:8180/auth/realms/master/app/admin",
+      "secret": "password"
+    },
+    {
+      "clientId": "direct-grant",
+      "enabled": true,
+      "directAccessGrantsEnabled": true,
+      "secret": "password",
+      "webOrigins": [ "http://localtest.me:8180" ],
+      "protocolMappers": [
+        {
+          "name": "aud-account",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "account",
+            "id.token.claim": "true",
+            "access.token.claim": "true"
+          }
+        },
+        {
+          "name": "aud-admin",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "security-admin-console",
+            "id.token.claim": "true",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "roles" : {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Have User privileges"
+      },
+      {
+        "name": "admin",
+        "description": "Have Administrator privileges"
+      },
+      {
+        "name": "customer-user-premium",
+        "description": "Have User Premium privileges"
+      },
+      {
+        "name": "sample-realm-role",
+        "description": "Sample realm role"
+      },
+      {
+        "name": "attribute-role",
+        "description": "has attributes assigned",
+        "attributes": {
+          "hello": [
+            "world",
+            "keycloak"
+          ]
+        }
+      }
+    ],
+    "client": {
+      "test-app": [
+        {
+          "name": "manage-account",
+          "description": "Allows application-initiated actions."
+        },
+        {
+          "name": "customer-user",
+          "description": "Have Customer User privileges"
+        },
+        {
+          "name": "customer-admin",
+          "description": "Have Customer Admin privileges"
+        },
+        {
+          "name": "sample-client-role",
+          "description": "Sample client role",
+          "attributes": {
+            "sample-client-role-attribute": [
+              "sample-client-role-attribute-value"
+            ]
+          }
+        },
+        {
+          "name": "customer-admin-composite-role",
+          "description": "Have Customer Admin privileges via composite role",
+          "composite": true,
+          "composites": {
+            "realm": [
+              "customer-user-premium"
+            ],
+            "client": {
+              "test-app": [
+                "customer-admin"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+
+  "groups" : [
+    {
+      "name": "topGroup",
+      "attributes": {
+        "topAttribute": ["true"]
+
+      },
+      "realmRoles": ["user"],
+
+      "subGroups": [
+        {
+          "name": "level2group",
+          "realmRoles": ["admin"],
+          "clientRoles": {
+            "test-app": ["customer-user"]
+          },
+          "attributes": {
+            "level2Attribute": ["true"]
+
+          }
+        },
+        {
+          "name": "level2group2",
+          "realmRoles": ["admin"],
+          "clientRoles": {
+            "test-app": ["customer-user"]
+          },
+          "attributes": {
+            "level2Attribute": ["true"]
+
+          }
+        }
+      ]
+    },
+    {
+      "name": "roleRichGroup",
+      "attributes": {
+        "topAttribute": ["true"]
+
+      },
+      "realmRoles": ["user", "realm-composite-role"],
+      "clientRoles": {
+        "account": ["manage-account"]
+      },
+
+      "subGroups": [
+        {
+          "name": "level2group",
+          "realmRoles": ["admin"],
+          "clientRoles": {
+            "test-app": ["customer-user", "customer-admin-composite-role"]
+          },
+          "attributes": {
+            "level2Attribute": ["true"]
+
+          }
+        },
+        {
+          "name": "level2group2",
+          "realmRoles": ["admin"],
+          "clientRoles": {
+            "test-app": ["customer-user"]
+          },
+          "attributes": {
+            "level2Attribute": ["true"]
+
+          }
+        }
+      ]
+    },
+    {
+      "name": "sample-realm-group"
+    }
+  ],
+  "eventsListeners": ["jboss-logging"]
+}

@@ -16,17 +16,15 @@
  */
 package org.keycloak.protocol.openshift;
 
-import org.keycloak.common.Profile;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.protocol.oidc.ext.OIDCExtProvider;
 import org.keycloak.protocol.oidc.ext.OIDCExtProviderFactory;
-import org.keycloak.provider.EnvironmentDependentProviderFactory;
 
 /**
  * @author <a href="mailto:bill@burkecentral.com">Bill Burke</a>
  * @version $Revision: 1 $
  */
-public class OpenShiftTokenReviewEndpointFactory implements OIDCExtProviderFactory, EnvironmentDependentProviderFactory {
+public class OpenShiftTokenReviewEndpointFactory implements OIDCExtProviderFactory {
 
     @Override
     public OIDCExtProvider create(KeycloakSession session) {
@@ -36,11 +34,6 @@ public class OpenShiftTokenReviewEndpointFactory implements OIDCExtProviderFacto
     @Override
     public String getId() {
         return "openshift-token-review";
-    }
-
-    @Override
-    public boolean isSupported() {
-        return Profile.isFeatureEnabled(Profile.Feature.OPENSHIFT_INTEGRATION);
     }
 
 }

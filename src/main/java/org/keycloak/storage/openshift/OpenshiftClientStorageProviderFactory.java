@@ -18,12 +18,10 @@ package org.keycloak.storage.openshift;
 
 import com.openshift.restclient.ClientBuilder;
 import com.openshift.restclient.IClient;
-import org.keycloak.common.Profile;
 import org.keycloak.component.ComponentModel;
 import org.keycloak.component.ComponentValidationException;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
-import org.keycloak.provider.EnvironmentDependentProviderFactory;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.provider.ProviderConfigurationBuilder;
 import org.keycloak.storage.CacheableStorageProviderModel;
@@ -38,7 +36,7 @@ import static org.keycloak.storage.CacheableStorageProviderModel.CACHE_POLICY;
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Igor</a>
  */
-public class OpenshiftClientStorageProviderFactory implements ClientStorageProviderFactory<OpenshiftClientStorageProvider>, EnvironmentDependentProviderFactory {
+public class OpenshiftClientStorageProviderFactory implements ClientStorageProviderFactory<OpenshiftClientStorageProvider> {
 
     public static final String PROVIDER_ID = "openshift-oauth-client";
     static final Pattern SERVICE_ACCOUNT_PATTERN = Pattern.compile("system:serviceaccount:([^:]+):([^:]+)");
@@ -124,11 +122,6 @@ public class OpenshiftClientStorageProviderFactory implements ClientStorageProvi
         } else {
             getClient(createProviderModel(newModel)).getAuthorizationContext().setToken(newModel.get(OpenshiftClientStorageProviderFactory.CONFIG_PROPERTY_ACCESS_TOKEN));
         }
-    }
-
-    @Override
-    public boolean isSupported() {
-        return Profile.isFeatureEnabled(Profile.Feature.OPENSHIFT_INTEGRATION);
     }
 
     private IClient getClient(ClientStorageProviderModel providerModel) {
