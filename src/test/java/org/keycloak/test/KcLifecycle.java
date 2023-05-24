@@ -61,7 +61,8 @@ public class KcLifecycle {
         return Keycloak.builder()
                 // TODO:mposolda do we need this?
                 //.setHomeDir(configuration.getProvidersPath())
-                .setVersion(KEYCLOAK_VERSION);
+                .setVersion(KEYCLOAK_VERSION)
+                .addDependency("org.keycloak.ext", "openshift-ext", "1.0-SNAPSHOT");
 
         // TODO:mposolda remove?
 //                .addDependency("org.keycloak.testsuite", "integration-arquillian-testsuite-providers", KEYCLOAK_VERSION)

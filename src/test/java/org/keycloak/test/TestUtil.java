@@ -52,12 +52,14 @@ public class TestUtil {
                 parameters.add(new BasicNameValuePair("otp", totp));
 
             }
-            if (clientSecret != null) {
-                String authorization = BasicAuthHelper.createHeader(clientId, clientSecret);
-                post.setHeader("Authorization", authorization);
-            } else {
-                parameters.add(new BasicNameValuePair("client_id", clientId));
-            }
+
+            addAuth(post, clientId, clientSecret);
+//            if (clientSecret != null) {
+//                String authorization = BasicAuthHelper.createHeader(clientId, clientSecret);
+//                post.setHeader("Authorization", authorization);
+//            } else {
+//                parameters.add(new BasicNameValuePair("client_id", clientId));
+//            }
 
 //            if (origin != null) {
 //                post.addHeader("Origin", origin);
@@ -93,6 +95,16 @@ public class TestUtil {
             post.setEntity(formEntity);
 
             return new AccessTokenResponse(client.execute(post));
+        }
+    }
+
+    public static void addAuth(HttpPost httpPost, String clientId, String clientSecret) {
+        if (clientSecret != null) {
+            String authorization = BasicAuthHelper.createHeader(clientId, clientSecret);
+            httpPost.setHeader("Authorization", authorization);
+        } else {
+            throw new IllegalArgumentException("clientSecret must be non-null");
+            //parameters.add(new BasicNameValuePair("client_id", clientId));
         }
     }
 

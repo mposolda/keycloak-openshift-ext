@@ -371,7 +371,7 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
     private class Review {
 
         private String realm = "test";
-        private String clientId = "test-app";
+        private String clientId = "direct-grant";
         private String username = "test-user@localhost";
         private String password = "password";
         private String algorithm = Algorithm.RS256;
@@ -435,6 +435,8 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
                     post.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
                     post.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.toString());
                     post.setEntity(new StringEntity(JsonSerialization.writeValueAsString(request)));
+
+                    TestUtil.addAuth(post, clientId, "password");
 
                     try (CloseableHttpResponse resp = client.execute(post)) {
                         responseStatus = resp.getStatusLine().getStatusCode();
