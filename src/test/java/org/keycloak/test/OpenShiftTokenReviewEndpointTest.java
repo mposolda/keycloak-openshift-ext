@@ -74,15 +74,9 @@ import static org.keycloak.utils.MediaType.APPLICATION_JSON;
 
 public class OpenShiftTokenReviewEndpointTest extends MyTest {
 
-    private static boolean flowConfigured;
-
-    // TODO:mposolda remove all events
-//    @Rule
-//    public AssertEvents events = new AssertEvents(this);
-
     @Override
     public void configureTestRealm(RealmRepresentation testRealm) {
-        ClientRepresentation client = testRealm.getClients().stream().filter(r -> r.getClientId().equals("test-app")).findFirst().get();
+        ClientRepresentation client = testRealm.getClients().stream().filter(r -> r.getClientId().equals("direct-grant")).findFirst().get();
 
         List<ProtocolMapperRepresentation> mappers = new LinkedList<>();
         ProtocolMapperRepresentation mapper = new ProtocolMapperRepresentation();
@@ -99,7 +93,7 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
 
         client.setProtocolMappers(mappers);
         client.setPublicClient(false);
-        client.setClientAuthenticatorType("testsuite-client-dummy");
+        client.setClientAuthenticatorType(ClientIdAndSecretAuthenticator.PROVIDER_ID);
 
         testRealm.getUsers().add(
                 UserBuilder.create()
@@ -114,37 +108,6 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
                         .username("empty-audience")
                         .password("password")
                         .build());
-    }
-
-    @Before
-    public void enablePassthroughAuthenticator() {
-        if (!flowConfigured) {
-            // TODO:mposolda remove?
-//            HashMap<String, String> data = new HashMap<>();
-//            data.put("newName", "testsuite-client-dummy");
-//            Response response = testRealm().flows().copy("clients", data);
-//            assertEquals(201, response.getStatus());
-//            response.close();
-//
-//            data = new HashMap<>();
-//            data.put("provider", "testsuite-client-dummy");
-//            data.put("requirement", "ALTERNATIVE");
-//
-//            testRealm().flows().addExecution("testsuite-client-dummy", data);
-//
-//            RealmRepresentation realmRep = testRealm().toRepresentation();
-//            realmRep.setClientAuthenticationFlow("testsuite-client-dummy");
-//            testRealm().update(realmRep);
-//
-//            List<AuthenticationExecutionInfoRepresentation> executions = testRealm().flows().getExecutions("testsuite-client-dummy");
-//            for (AuthenticationExecutionInfoRepresentation e : executions) {
-//                if (e.getProviderId().equals("testsuite-client-dummy")) {
-//                    e.setRequirement("ALTERNATIVE");
-//                    testRealm().flows().updateExecutions("testsuite-client-dummy", e);
-//                }
-//            }
-            flowConfigured = true;
-        }
     }
 
     @Test
@@ -162,211 +125,193 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
         r.assertScope("openid", "email", "profile");
     }
 
-    // TODO:mposolda uncomment and make it working
-//    @Test
-//    public void longExpiration() {
-//        ClientResource client = ApiUtil.findClientByClientId(adminClient.realm("test"), "test-app");
-//        ClientRepresentation clientRep = client.toRepresentation();
-//
-//        try {
-//            clientRep.getAttributes().put(OIDCConfigAttributes.ACCESS_TOKEN_LIFESPAN, "-1");
-//            client.update(clientRep);
-//
-//            // Set time offset just before SSO idle, to get session last refresh updated
-//
-//            setTimeOffset(1500);
-//
-//            Review review = new Review();
-//
-//            review.invoke().assertSuccess();
-//
-//            // Bump last refresh updated again
-//
-//            setTimeOffset(3000);
-//
-//            review.invoke().assertSuccess();
-//
-//            // And, again
-//
-//            setTimeOffset(4500);
-//
-//            // Token should still be valid as session last refresh should have been updated
-//
-//            review.invoke().assertSuccess();
-//        } finally {
-//            clientRep.getAttributes().put(OIDCConfigAttributes.ACCESS_TOKEN_LIFESPAN, null);
-//            client.update(clientRep);
-//        }
-//    }
-//
-//    @Test
-//    public void hs256() {
-//        RealmResource realm = adminClient.realm("test");
-//        RealmRepresentation rep = realm.toRepresentation();
-//
-//        try {
-//            rep.setDefaultSignatureAlgorithm(Algorithm.HS256);
-//            realm.update(rep);
-//
-//            Review r = new Review().algorithm(Algorithm.HS256).invoke()
-//                    .assertSuccess();
-//
-//            String userId = testRealm().users().search(r.username).get(0).getId();
-//
-//            OpenShiftTokenReviewResponseRepresentation.User user = r.response.getStatus().getUser();
-//
-//            assertEquals(userId, user.getUid());
-//            assertEquals("test-user@localhost", user.getUsername());
-//            assertNotNull(user.getExtra());
-//
-//            r.assertScope("openid", "email", "profile");
-//        } finally {
-//            rep.setDefaultSignatureAlgorithm(null);
-//            realm.update(rep);
-//        }
-//    }
-//
-//    @Test
-//    public void groups() {
-//        new Review().username("groups-user")
-//                .invoke()
-//                .assertSuccess().assertGroups("topGroup", "level2group");
-//    }
-//
-//    @Test
-//    public void customScopes() {
-//        ClientScopeRepresentation clientScope = new ClientScopeRepresentation();
-//        clientScope.setProtocol("openid-connect");
-//        clientScope.setName("user:info");
-//
-//        String id;
-//        try (Response r = testRealm().clientScopes().create(clientScope)) {
-//            id = ApiUtil.getCreatedId(r);
-//        }
-//
-//        ClientRepresentation clientRep = testRealm().clients().findByClientId("test-app").get(0);
-//
-//        testRealm().clients().get(clientRep.getId()).addOptionalClientScope(id);
-//
-//        try {
-//            oauth.scope("user:info");
-//            new Review()
-//                    .invoke()
-//                    .assertSuccess().assertScope("openid", "user:info", "profile", "email");
-//        } finally {
-//            testRealm().clients().get(clientRep.getId()).removeOptionalClientScope(id);
-//        }
-//    }
-//
-//    @Test
-//    public void emptyAudience() {
-//        new Review().username("empty-audience")
-//                .invoke()
-//                .assertError(401, "Token verification failure");
-//    }
-//
-//    @Test
-//    public void expiredToken() {
-//        try {
-//            new Review()
-//                    .runAfterTokenRequest(i -> setTimeOffset(testRealm().toRepresentation().getAccessTokenLifespan() + 10))
-//                    .invoke()
-//                    .assertError(401, "Token verification failure");
-//        } finally {
-//            resetTimeOffset();
-//        }
-//    }
-//
-//    @Test
-//    public void invalidPublicKey() {
-//        new Review()
-//                .runAfterTokenRequest(i -> {
-//                    String header = i.token.split("\\.")[0];
-//                    String s = new String(Base64Url.decode(header));
-//                    s = s.replace(",\"kid\" : \"", ",\"kid\" : \"x");
-//                    String newHeader = Base64Url.encode(s.getBytes());
-//                    i.token = i.token.replaceFirst(header, newHeader);
-//                })
-//                .invoke()
-//                .assertError(401, "Token verification failure");
-//    }
-//
-//    @Test
-//    public void noUserSession() {
-//        new Review()
-//                .runAfterTokenRequest(i -> {
-//                    String userId = testRealm().users().search(i.username).get(0).getId();
-//                    testRealm().users().get(userId).logout();
-//                })
-//                .invoke()
-//                .assertError(401, "Token verification failure");
-//    }
-//
-//    @Test
-//    public void invalidTokenSignature() {
-//        new Review()
-//                .runAfterTokenRequest(i -> i.token += "x")
-//                .invoke()
-//                .assertError(401, "Token verification failure");
-//    }
-//
-//    @Test
-//    public void realmDisabled() {
-//        RealmRepresentation r = testRealm().toRepresentation();
-//        try {
-//            new Review().runAfterTokenRequest(i -> {
-//                r.setEnabled(false);
-//                testRealm().update(r);
-//            }).invoke().assertError(401, null);
-//
-//
-//        } finally {
-//            r.setEnabled(true);
-//            testRealm().update(r);
-//        }
-//    }
-//
-//    @Test
-//    public void publicClientNotPermitted() {
-//        ClientRepresentation clientRep = testRealm().clients().findByClientId("test-app").get(0);
-//        clientRep.setPublicClient(true);
-//        testRealm().clients().get(clientRep.getId()).update(clientRep);
-//        try {
-//            new Review()
-//                    .clientAuthMethod(ClientIdAndSecretAuthenticator.PROVIDER_ID)
-//                    .invoke().assertError(401, "Public client is not permitted to invoke token review endpoint");
-//        } finally {
-//            clientRep.setPublicClient(false);
-//            clientRep.setSecret("password");
-//            testRealm().clients().get(clientRep.getId()).update(clientRep);
-//        }
-//    }
-//
-//    @Test
-//    public void checkPropertyValidation() throws IOException {
-//        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-//            String url = getAuthServerContextRoot() + "/auth/realms/" + "test" + "/protocol/openid-connect/ext/openshift-token-review/";
-//
-//            HttpPost post = new HttpPost(url);
-//            post.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
-//            post.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.toString());
-//            post.setEntity(new StringEntity("{\"<img src=alert(1)>\":1}"));
-//
-//            try (CloseableHttpResponse response = client.execute(post)) {
-//                Header header = response.getFirstHeader("Content-Type");
-//                assertThat(header, notNullValue());
-//
-//                // Verify the Content-Type is not text/html
-//                assertThat(Arrays.stream(header.getElements())
-//                        .map(HeaderElement::getName)
-//                        .filter(Objects::nonNull)
-//                        .anyMatch(f -> f.equals(APPLICATION_JSON)), is(true));
-//
-//                // OpenShiftTokenReviewRequestRepresentation ignore unknown attributes and is returned default representation
-//                assertThat(EntityUtils.toString(response.getEntity()).contains("Unrecognized field \\\"<img src=alert(1)>\\\""), is(false));
-//            }
-//        }
-//    }
+    @Test
+    public void longExpiration() {
+        ClientResource client = TestUtil.findClientByClientId(ADMIN_CLIENT.realm("test"), "direct-grant");
+        ClientRepresentation clientRep = client.toRepresentation();
+
+        try {
+            clientRep.getAttributes().put(OIDCConfigAttributes.ACCESS_TOKEN_LIFESPAN, "-1");
+            client.update(clientRep);
+
+            // Set time offset just before SSO idle, to get session last refresh updated
+            // TODO: Ignore tests using time offset for now. Figure how to test timeOffset if needed
+            //setTimeOffset(1500);
+
+            Review review = new Review();
+
+            review.invoke().assertSuccess();
+
+            // Bump last refresh updated again
+
+            //setTimeOffset(3000);
+
+            review.invoke().assertSuccess();
+
+            // And, again
+
+            //setTimeOffset(4500);
+
+            // Token should still be valid as session last refresh should have been updated
+
+            review.invoke().assertSuccess();
+        } finally {
+            clientRep.getAttributes().put(OIDCConfigAttributes.ACCESS_TOKEN_LIFESPAN, null);
+            client.update(clientRep);
+        }
+    }
+
+    @Test
+    public void hs256() {
+        RealmResource realm = ADMIN_CLIENT.realm("test");
+        RealmRepresentation rep = realm.toRepresentation();
+
+        try {
+            rep.setDefaultSignatureAlgorithm(Algorithm.HS256);
+            realm.update(rep);
+
+            Review r = new Review().algorithm(Algorithm.HS256).invoke()
+                    .assertSuccess();
+
+            String userId = testRealm().users().search(r.username).get(0).getId();
+
+            OpenShiftTokenReviewResponseRepresentation.User user = r.response.getStatus().getUser();
+
+            assertEquals(userId, user.getUid());
+            assertEquals("test-user@localhost", user.getUsername());
+            assertNotNull(user.getExtra());
+
+            r.assertScope("openid", "email", "profile");
+        } finally {
+            rep.setDefaultSignatureAlgorithm(null);
+            realm.update(rep);
+        }
+    }
+
+    @Test
+    public void groups() {
+        new Review().username("groups-user")
+                .invoke()
+                .assertSuccess().assertGroups("topGroup", "level2group");
+    }
+
+    @Test
+    public void customScopes() {
+        ClientScopeRepresentation clientScope = new ClientScopeRepresentation();
+        clientScope.setProtocol("openid-connect");
+        clientScope.setName("user:info");
+
+        String id;
+        try (Response r = testRealm().clientScopes().create(clientScope)) {
+            id = TestsHelper.getCreatedId(r);
+        }
+
+        ClientRepresentation clientRep = testRealm().clients().findByClientId("direct-grant").get(0);
+
+        testRealm().clients().get(clientRep.getId()).addOptionalClientScope(id);
+
+        try {
+            //oauth.scope("user:info");
+            new Review()
+                    .scope("user:info")
+                    .invoke()
+                    .assertSuccess().assertScope("openid", "user:info", "profile", "email");
+        } finally {
+            testRealm().clients().get(clientRep.getId()).removeOptionalClientScope(id);
+        }
+    }
+
+
+    @Test
+    public void invalidPublicKey() {
+        new Review()
+                .runAfterTokenRequest(i -> {
+                    String header = i.token.split("\\.")[0];
+                    String s = new String(Base64Url.decode(header));
+                    s = s.replace(",\"kid\" : \"", ",\"kid\" : \"x");
+                    String newHeader = Base64Url.encode(s.getBytes());
+                    i.token = i.token.replaceFirst(header, newHeader);
+                })
+                .invoke()
+                .assertError(401);
+    }
+
+    @Test
+    public void noUserSession() {
+        new Review()
+                .runAfterTokenRequest(i -> {
+                    String userId = testRealm().users().search(i.username).get(0).getId();
+                    testRealm().users().get(userId).logout();
+                })
+                .invoke()
+                .assertError(401);
+    }
+
+    @Test
+    public void invalidTokenSignature() {
+        new Review()
+                .runAfterTokenRequest(i -> i.token += "x")
+                .invoke()
+                .assertError(401);
+    }
+
+    @Test
+    public void realmDisabled() {
+        RealmRepresentation r = testRealm().toRepresentation();
+        try {
+            new Review().runAfterTokenRequest(i -> {
+                r.setEnabled(false);
+                testRealm().update(r);
+            }).invoke().assertError(401);
+
+
+        } finally {
+            r.setEnabled(true);
+            testRealm().update(r);
+        }
+    }
+
+    @Test
+    public void publicClientNotPermitted() {
+        ClientRepresentation clientRep = testRealm().clients().findByClientId("direct-grant").get(0);
+        clientRep.setPublicClient(true);
+        testRealm().clients().get(clientRep.getId()).update(clientRep);
+        try {
+            new Review()
+                    .clientAuthMethod(ClientIdAndSecretAuthenticator.PROVIDER_ID)
+                    .invoke().assertError(401);
+        } finally {
+            clientRep.setPublicClient(false);
+            clientRep.setSecret("password");
+            testRealm().clients().get(clientRep.getId()).update(clientRep);
+        }
+    }
+
+    @Test
+    public void checkPropertyValidation() throws IOException {
+        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+            String url = keycloakBaseUrl + "/realms/" + "test" + "/protocol/openid-connect/ext/openshift-token-review/";
+
+            HttpPost post = new HttpPost(url);
+            post.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+            post.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.toString());
+            post.setEntity(new StringEntity("{\"<img src=alert(1)>\":1}"));
+
+            try (CloseableHttpResponse response = client.execute(post)) {
+                Header header = response.getFirstHeader("Content-Type");
+                assertThat(header, notNullValue());
+
+                // Verify the Content-Type is not text/html
+                assertThat(Arrays.stream(header.getElements())
+                        .map(HeaderElement::getName)
+                        .filter(Objects::nonNull)
+                        .anyMatch(f -> f.equals(APPLICATION_JSON)), is(true));
+
+                // OpenShiftTokenReviewRequestRepresentation ignore unknown attributes and is returned default representation
+                assertThat(EntityUtils.toString(response.getEntity()).contains("Unrecognized field \\\"<img src=alert(1)>\\\""), is(false));
+            }
+        }
+    }
 
     private class Review {
 
@@ -374,6 +319,9 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
         private String clientId = "direct-grant";
         private String username = "test-user@localhost";
         private String password = "password";
+
+        private String scope;
+
         private String algorithm = Algorithm.RS256;
         private InvokeRunnable runAfterTokenRequest;
 
@@ -397,6 +345,11 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
             return this;
         }
 
+        public Review scope(String scope) {
+            this.scope = scope;
+            return this;
+        }
+
         public Review runAfterTokenRequest(InvokeRunnable runnable) {
             this.runAfterTokenRequest = runnable;
             return this;
@@ -405,13 +358,8 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
         public Review invoke() {
             try {
                 if (token == null) {
-//                    String userId = testRealm().users().search(username).get(0).getId();
-//                    oauth.doLogin(username, password);
-//                    EventRepresentation loginEvent = events.expectLogin().user(userId).assertEvent();
-//
-//                    String code = oauth.getCurrentQuery().get(OAuth2Constants.CODE);
                     TestUtil.AccessTokenResponse accessTokenResponse = TestUtil.doGrantAccessTokenRequest("test", username, password, null,
-                            "direct-grant", "password", null);
+                            "direct-grant", "password", scope);
 
                     token = accessTokenResponse.getAccessToken();
                 }
@@ -463,12 +411,6 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
             assertEquals(expectedStatus, responseStatus);
             assertFalse(response.getStatus().isAuthenticated());
             assertNull(response.getStatus().getUser());
-
-//            if (expectedReason != null) {
-//                EventRepresentation poll = events.poll();
-//                assertEquals(expectedReason, poll.getDetails().get(Details.REASON));
-//            }
-
             return this;
         }
 

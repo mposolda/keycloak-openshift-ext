@@ -19,9 +19,12 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.Assert;
 import org.keycloak.OAuth2Constants;
+import org.keycloak.admin.client.resource.ClientResource;
+import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.constants.AdapterConstants;
 import org.keycloak.protocol.oidc.OIDCLoginProtocolService;
 import org.keycloak.representations.AccessTokenResponse;
+import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.util.BasicAuthHelper;
 import org.keycloak.util.JsonSerialization;
 import org.keycloak.util.TokenUtil;
@@ -34,7 +37,7 @@ import static org.keycloak.test.TestsHelper.keycloakBaseUrl;
 public class TestUtil {
 
     public static AccessTokenResponse doGrantAccessTokenRequest(String realm, String username, String password, String totp,
-                                                         String clientId, String clientSecret, String userAgent) throws Exception {
+                                                         String clientId, String clientSecret, String scope) throws Exception {
         try (CloseableHttpClient client = newCloseableHttpClient()) {
             HttpPost post = new HttpPost(getResourceOwnerPasswordCredentialGrantUrl(realm));
 
@@ -72,14 +75,14 @@ public class TestUtil {
 //                parameters.add(new BasicNameValuePair(AdapterConstants.CLIENT_SESSION_HOST, clientSessionHost));
 //            }
 
-            String scopeParam = "openid"; // ? TokenUtil.attachOIDCScope(scope) : scope;
+            String scopeParam = TokenUtil.attachOIDCScope(scope);
             if (scopeParam != null && !scopeParam.isEmpty()) {
                 parameters.add(new BasicNameValuePair(OAuth2Constants.SCOPE, scopeParam));
             }
 
-            if (userAgent != null) {
-                post.addHeader("User-Agent", userAgent);
-            }
+//            if (userAgent != null) {
+//                post.addHeader("User-Agent", userAgent);
+//            }
 
 //            if (customParameters != null) {
 //                customParameters.keySet().stream()
@@ -269,5 +272,14 @@ public class TestUtil {
         public Map<String, Object> getOtherClaims() {
             return otherClaims;
         }
+    }
+
+    public static ClientResource findClientByClientId(RealmResource realm, String clientId) {
+        for (ClientRepresentation c : realm.clients().findAll()) {
+            if (clientId.equals(c.getClientId())) {
+                return realm.clients().get(c.getId());
+            }
+        }
+        return null;
     }
 }

@@ -18,8 +18,7 @@
     <openshift-client.version>9.0.5.Final</openshift-client.version>
     <jakarta.ws.rs.version>3.1.0</jakarta.ws.rs.version>
     <junit.version>4.13.2</junit.version>
-    <!-- Needs to be aligned with Quarkus, see e.g. https://github.com/quarkusio/quarkus-quickstarts/blob/2.13.5.Final/getting-started-async/pom.xml#L14 -->
-    <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
+    <surefire-plugin.version>2.12.4</surefire-plugin.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
