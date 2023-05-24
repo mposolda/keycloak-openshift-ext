@@ -17,7 +17,6 @@
 package org.keycloak.protocol.openshift;
 
 import org.keycloak.TokenVerifier;
-import org.keycloak.common.Profile;
 import org.keycloak.common.VerificationException;
 import org.keycloak.crypto.SignatureProvider;
 import org.keycloak.crypto.SignatureVerifierContext;
@@ -31,25 +30,24 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.protocol.oidc.TokenManager;
 import org.keycloak.protocol.oidc.ext.OIDCExtProvider;
 import org.keycloak.protocol.oidc.utils.AuthorizeClientUtil;
-import org.keycloak.provider.EnvironmentDependentProviderFactory;
 import org.keycloak.representations.AccessToken;
 import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.Urls;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 
 /**
  * @author <a href="mailto:bill@burkecentral.com">Bill Burke</a>
  * @version $Revision: 1 $
  */
-public class OpenShiftTokenReviewEndpoint implements OIDCExtProvider, EnvironmentDependentProviderFactory {
+public class OpenShiftTokenReviewEndpoint implements OIDCExtProvider {
 
     private KeycloakSession session;
     private TokenManager tokenManager;
@@ -170,10 +168,5 @@ public class OpenShiftTokenReviewEndpoint implements OIDCExtProvider, Environmen
         event.detail(Details.REASON, description);
 
         throw new ErrorResponseException(response);
-    }
-
-    @Override
-    public boolean isSupported() {
-        return Profile.isFeatureEnabled(Profile.Feature.OPENSHIFT_INTEGRATION);
     }
 }

@@ -12,8 +12,11 @@
   <url>http://www.example.com</url>
 
   <properties>
-    <keycloak.version>21.0.0</keycloak.version>
+    <!-- TODO: Change this to Keycloak 22 once it is released -->
+    <keycloak.version>999.0.0-SNAPSHOT</keycloak.version>
+
     <openshift-client.version>9.0.5.Final</openshift-client.version>
+    <jakarta.ws.rs.version>3.1.0</jakarta.ws.rs.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
@@ -130,10 +133,9 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.jboss.spec.javax.ws.rs</groupId>
-      <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-      <version>1.0.1.Final</version>
-      <scope>provided</scope>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>${jakarta.ws.rs.version}</version>
     </dependency>
     <dependency>
       <groupId>com.openshift</groupId>
