@@ -21,10 +21,12 @@ import org.junit.Assert;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.common.util.StreamUtil;
 import org.keycloak.constants.AdapterConstants;
 import org.keycloak.protocol.oidc.OIDCLoginProtocolService;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.ClientRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.util.BasicAuthHelper;
 import org.keycloak.util.JsonSerialization;
 import org.keycloak.util.TokenUtil;
@@ -166,7 +168,7 @@ public class TestUtil {
                     Assert.fail("Invalid content type. Status: " + statusCode + ", contentType: " + contentType);
                 }
 
-                String s = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+                String s = StreamUtil.readString(response.getEntity().getContent(), StandardCharsets.UTF_8);
                 @SuppressWarnings("unchecked")
                 Map<String, Object> responseJson = JsonSerialization.readValue(s, Map.class);
 
@@ -281,5 +283,23 @@ public class TestUtil {
             }
         }
         return null;
+    }
+
+    public static UserRepresentation findUserByUsername(RealmResource realm, String username) {
+        UserRepresentation user = null;
+        List<UserRepresentation> ur = realm.users().search(username, null, null, null, 0, -1);
+        if (ur.size() == 1) {
+            user = ur.get(0);
+        }
+
+        if (ur.size() > 1) { // try to be more specific
+            for (UserRepresentation rep : ur) {
+                if (rep.getUsername().equalsIgnoreCase(username)) {
+                    return rep;
+                }
+            }
+        }
+
+        return user;
     }
 }

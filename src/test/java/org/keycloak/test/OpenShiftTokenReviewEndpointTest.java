@@ -71,8 +71,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.keycloak.test.TestsHelper.keycloakBaseUrl;
-import static org.keycloak.utils.MediaType.APPLICATION_JSON;
 
 public class OpenShiftTokenReviewEndpointTest extends MyTest {
 
@@ -129,7 +127,7 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
 
     @Test
     public void longExpiration() {
-        ClientResource client = TestUtil.findClientByClientId(ADMIN_CLIENT.realm("test"), "direct-grant");
+        ClientResource client = TestUtil.findClientByClientId(adminClient.realm("test"), "direct-grant");
         ClientRepresentation clientRep = client.toRepresentation();
 
         try {
@@ -165,7 +163,7 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
 
     @Test
     public void hs256() {
-        RealmResource realm = ADMIN_CLIENT.realm("test");
+        RealmResource realm = adminClient.realm("test");
         RealmRepresentation rep = realm.toRepresentation();
 
         try {
@@ -439,7 +437,7 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
     }
 
     protected RealmResource testRealm() {
-        return ADMIN_CLIENT.realm(TEST_REALM_NAME);
+        return adminClient.realm(TEST_REALM_NAME);
     }
 
 }

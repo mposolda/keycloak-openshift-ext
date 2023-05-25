@@ -19,6 +19,11 @@
     <jakarta.ws.rs.version>3.1.0</jakarta.ws.rs.version>
     <junit.version>4.13.2</junit.version>
     <surefire-plugin.version>2.12.4</surefire-plugin.version>
+    <undertow.version>2.2.24.Final</undertow.version>
+    <version.jee.jaxb.api>2.3.1</version.jee.jaxb.api>
+    <arquillian-graphene.version>2.5.4</arquillian-graphene.version>
+    <arquillian-phantom.version>1.2.1.Final</arquillian-phantom.version>
+    <arquillian-screenshooter.version>2.3.2</arquillian-screenshooter.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
@@ -181,6 +186,38 @@
       <version>${keycloak.version}</version>
       <scope>test</scope>
     </dependency>
+    <!--<dependency>
+      <groupId>io.undertow</groupId>
+      <artifactId>undertow-core</artifactId>
+      <version>${undertow.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.arquillian.graphene</groupId>
+      <artifactId>graphene-webdriver</artifactId>
+      <version>${arquillian-graphene.version}</version>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.arquillian.extension</groupId>
+      <artifactId>arquillian-phantom-driver</artifactId>
+      <version>${arquillian-phantom.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.arquillian.graphene</groupId>
+      <artifactId>arquillian-browser-screenshooter</artifactId>
+      <version>${arquillian-screenshooter.version}</version>
+      <scope>test</scope>
+    </dependency>-->
+    <!-- Only needed for testing by arquillian (ExporterRegistrationHandler requires JEE JAXB) -->
+    <!--<dependency>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
+      <version>${version.jee.jaxb.api}</version>
+      <scope>test</scope>
+    </dependency>-->
 
   </dependencies>
 
