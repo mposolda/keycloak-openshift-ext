@@ -36,7 +36,7 @@ public abstract class MyTest {
         keycloak = new KcLifecycle();
         keycloak.start();
 
-        ADMIN_CLIENT = Keycloak.getInstance(keycloakBaseUrl, "master", "admin", "admin", "admin-cli");
+        ADMIN_CLIENT = Keycloak.getInstance(TestsHelper.keycloakBaseUrl, "master", "admin", "admin", "admin-cli");
 
         System.out.println("START KEYCLOAK FINISHED");
     }
@@ -57,7 +57,7 @@ public abstract class MyTest {
 
     @After
     public void after() throws IOException {
-        deleteRealm("admin", "admin", "test");
+        TestsHelper.deleteRealm("admin", "admin", "test");
     }
 
     private boolean importTestRealm(String username, String password, String realmJsonPath) throws IOException {
@@ -84,7 +84,7 @@ public abstract class MyTest {
 //        sleep(60000);
 //    }
 
-    private void sleep(long ms) {
+    protected void sleep(long ms) {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException ie) {

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.keycloak.testsuite.openshift;
+package org.keycloak.test;
 
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -61,19 +61,14 @@ import static org.keycloak.testsuite.ProfileAssume.assumeFeatureEnabled;
 import static org.keycloak.testsuite.admin.ApiUtil.findUserByUsername;
 
 /**
- * TODO Refactor to using test containers
  *
  * Test that clients can override auth flows
  *
  * @author <a href="mailto:psilva@redhat.com">Pedro Igor</a>
  */
-@EnableFeature(value = OPENSHIFT_INTEGRATION, skipRestart = true)
-public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakTest {
+public final class OpenshiftClientStorageTest extends MyTest {
 
     private static Undertow OPENSHIFT_API_SERVER;
-
-    @Rule
-    public AssertEvents events = new AssertEvents(this);
 
     @Page
     private LoginPage loginPage;
@@ -148,7 +143,6 @@ public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakT
 
     @Before
     public void onBefore() {
-        assumeFeatureEnabled(OPENSHIFT_INTEGRATION);
         ComponentRepresentation provider = new ComponentRepresentation();
 
         provider.setName("openshift-client-storage");
@@ -278,7 +272,7 @@ public final class OpenshiftClientStorageTest extends AbstractTestRealmKeycloakT
                 token.getScope().contains(expectedScope);
             }
         } catch (Exception e) {
-            fail("Failed to parse access token");
+            Assert.fail("Failed to parse access token");
             e.printStackTrace();
         }
 

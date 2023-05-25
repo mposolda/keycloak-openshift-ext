@@ -112,7 +112,7 @@ public class TestUtil {
     }
 
     public static String getResourceOwnerPasswordCredentialGrantUrl(String realm) {
-        UriBuilder b = OIDCLoginProtocolService.tokenUrl(UriBuilder.fromUri(keycloakBaseUrl));
+        UriBuilder b = OIDCLoginProtocolService.tokenUrl(UriBuilder.fromUri(TestsHelper.keycloakBaseUrl));
         return b.build(realm).toString();
     }
 

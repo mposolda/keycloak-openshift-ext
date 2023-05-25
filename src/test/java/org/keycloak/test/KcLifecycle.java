@@ -42,7 +42,9 @@ public class KcLifecycle {
 //        TestUtil.setEnvVariable(KEYCLOAK_ADMIN_PASSWORD_ENV_VAR, "admin");
 
         return Arrays.asList("-v",
-                "start-dev");
+                "start-dev",
+                "--db=dev-mem",
+                "--cache=local");
     }
 
     public void stop() {
@@ -63,11 +65,5 @@ public class KcLifecycle {
                 //.setHomeDir(configuration.getProvidersPath())
                 .setVersion(KEYCLOAK_VERSION)
                 .addDependency("org.keycloak.ext", "openshift-ext", "1.0-SNAPSHOT");
-
-        // TODO:mposolda remove?
-//                .addDependency("org.keycloak.testsuite", "integration-arquillian-testsuite-providers", KEYCLOAK_VERSION)
-//                .addDependency("org.keycloak.testsuite", "integration-arquillian-testsuite-providers-deployment", KEYCLOAK_VERSION)
-//                .addDependency("org.keycloak.testsuite", "integration-arquillian-tests-base", KEYCLOAK_VERSION)
-//                .addDependency("org.keycloak.testsuite", "integration-arquillian-tests-base", KEYCLOAK_VERSION, "tests");
     }
 }

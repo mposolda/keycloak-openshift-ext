@@ -15,6 +15,7 @@ cp target/lib/*.jar $KEYCLOAK_HOME/providers/
 
 ## TODO
 
-* Clean-up dependencies
-* Clean-up how to deploy to Keycloak
-* Test, potentially with test containers
+* Fix UserBuilder from Keycloak test helper?
+* Fix test for client storage and make it working
+* Clean-up dependencies - and test manually somehow that both clientStorage and review endpoint works
+* Fix README and update instructions with details about Openshift etc.

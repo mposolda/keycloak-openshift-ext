@@ -18,6 +18,7 @@
 package org.keycloak.test;
 
 import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -28,15 +29,17 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.junit.Before;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.hamcrest.collection.IsIterableContainingInAnyOrder;
+import org.hamcrest.core.Is;
+import org.junit.Assert;
 import org.junit.Test;
-import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.authentication.authenticators.client.ClientIdAndSecretAuthenticator;
 import org.keycloak.common.util.Base64Url;
 import org.keycloak.crypto.Algorithm;
-import org.keycloak.events.Details;
 import org.keycloak.jose.jws.JWSInput;
 import org.keycloak.protocol.oidc.OIDCConfigAttributes;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
@@ -44,12 +47,11 @@ import org.keycloak.protocol.oidc.mappers.GroupMembershipMapper;
 import org.keycloak.protocol.oidc.mappers.OIDCAttributeMapperHelper;
 import org.keycloak.protocol.openshift.OpenShiftTokenReviewRequestRepresentation;
 import org.keycloak.protocol.openshift.OpenShiftTokenReviewResponseRepresentation;
-import org.keycloak.representations.idm.AuthenticationExecutionInfoRepresentation;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.ClientScopeRepresentation;
-import org.keycloak.representations.idm.EventRepresentation;
 import org.keycloak.representations.idm.ProtocolMapperRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
+import org.keycloak.test.builders.UserBuilder;
 import org.keycloak.util.JsonSerialization;
 
 import java.io.IOException;
@@ -118,9 +120,9 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
 
         OpenShiftTokenReviewResponseRepresentation.User user = r.response.getStatus().getUser();
 
-        assertEquals(userId, user.getUid());
-        assertEquals("test-user@localhost", user.getUsername());
-        assertNotNull(user.getExtra());
+        Assert.assertEquals(userId, user.getUid());
+        Assert.assertEquals("test-user@localhost", user.getUsername());
+        Assert.assertNotNull(user.getExtra());
 
         r.assertScope("openid", "email", "profile");
     }
@@ -177,9 +179,9 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
 
             OpenShiftTokenReviewResponseRepresentation.User user = r.response.getStatus().getUser();
 
-            assertEquals(userId, user.getUid());
-            assertEquals("test-user@localhost", user.getUsername());
-            assertNotNull(user.getExtra());
+            Assert.assertEquals(userId, user.getUid());
+            Assert.assertEquals("test-user@localhost", user.getUsername());
+            Assert.assertNotNull(user.getExtra());
 
             r.assertScope("openid", "email", "profile");
         } finally {
@@ -290,7 +292,7 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
     @Test
     public void checkPropertyValidation() throws IOException {
         try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-            String url = keycloakBaseUrl + "/realms/" + "test" + "/protocol/openid-connect/ext/openshift-token-review/";
+            String url = TestsHelper.keycloakBaseUrl + "/realms/" + "test" + "/protocol/openid-connect/ext/openshift-token-review/";
 
             HttpPost post = new HttpPost(url);
             post.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
@@ -299,16 +301,16 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
 
             try (CloseableHttpResponse response = client.execute(post)) {
                 Header header = response.getFirstHeader("Content-Type");
-                assertThat(header, notNullValue());
+                MatcherAssert.assertThat(header, Matchers.notNullValue());
 
                 // Verify the Content-Type is not text/html
-                assertThat(Arrays.stream(header.getElements())
+                MatcherAssert.assertThat(Arrays.stream(header.getElements())
                         .map(HeaderElement::getName)
                         .filter(Objects::nonNull)
-                        .anyMatch(f -> f.equals(APPLICATION_JSON)), is(true));
+                        .anyMatch(f -> f.equals(MediaType.APPLICATION_JSON)), Is.is(true));
 
                 // OpenShiftTokenReviewRequestRepresentation ignore unknown attributes and is returned default representation
-                assertThat(EntityUtils.toString(response.getEntity()).contains("Unrecognized field \\\"<img src=alert(1)>\\\""), is(false));
+                MatcherAssert.assertThat(EntityUtils.toString(response.getEntity()).contains("Unrecognized field \\\"<img src=alert(1)>\\\""), Is.is(false));
             }
         }
     }
@@ -364,14 +366,14 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
                     token = accessTokenResponse.getAccessToken();
                 }
 
-                assertEquals(algorithm, new JWSInput(token).getHeader().getAlgorithm().name());
+                Assert.assertEquals(algorithm, new JWSInput(token).getHeader().getAlgorithm().name());
 
                 if (runAfterTokenRequest != null) {
                     runAfterTokenRequest.run(this);
                 }
 
                 try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-                    String url = keycloakBaseUrl + "/realms/" + realm + "/protocol/openid-connect/ext/openshift-token-review/" + clientId;
+                    String url = TestsHelper.keycloakBaseUrl + "/realms/" + realm + "/protocol/openid-connect/ext/openshift-token-review/" + clientId;
 
                     OpenShiftTokenReviewRequestRepresentation request = new OpenShiftTokenReviewRequestRepresentation();
                     OpenShiftTokenReviewRequestRepresentation.Spec spec = new OpenShiftTokenReviewRequestRepresentation.Spec();
@@ -391,8 +393,8 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
                         response = JsonSerialization.readValue(resp.getEntity().getContent(), OpenShiftTokenReviewResponseRepresentation.class);
                     }
 
-                    assertEquals("authentication.k8s.io/v1beta1", response.getApiVersion());
-                    assertEquals("TokenReview", response.getKind());
+                    Assert.assertEquals("authentication.k8s.io/v1beta1", response.getApiVersion());
+                    Assert.assertEquals("TokenReview", response.getKind());
                 }
                 return this;
             } catch (Exception e) {
@@ -401,33 +403,33 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
         }
 
         public Review assertSuccess() {
-            assertEquals(200, responseStatus);
-            assertTrue(response.getStatus().isAuthenticated());
-            assertNotNull(response.getStatus().getUser());
+            Assert.assertEquals(200, responseStatus);
+            Assert.assertTrue(response.getStatus().isAuthenticated());
+            Assert.assertNotNull(response.getStatus().getUser());
             return this;
         }
 
         private Review assertError(int expectedStatus) {
-            assertEquals(expectedStatus, responseStatus);
-            assertFalse(response.getStatus().isAuthenticated());
-            assertNull(response.getStatus().getUser());
+            Assert.assertEquals(expectedStatus, responseStatus);
+            Assert.assertFalse(response.getStatus().isAuthenticated());
+            Assert.assertNull(response.getStatus().getUser());
             return this;
         }
 
         private void assertScope(String... expectedScope) {
             List<String> actualScopes = Arrays.asList(response.getStatus().getUser().getExtra().getScopes());
-            assertEquals(expectedScope.length, actualScopes.size());
-            assertThat(actualScopes, containsInAnyOrder(expectedScope));
+            Assert.assertEquals(expectedScope.length, actualScopes.size());
+            MatcherAssert.assertThat(actualScopes, IsIterableContainingInAnyOrder.containsInAnyOrder(expectedScope));
         }
 
         private void assertEmptyScope() {
-            assertNull(response.getStatus().getUser().getExtra());
+            Assert.assertNull(response.getStatus().getUser().getExtra());
         }
 
         private void assertGroups(String... expectedGroups) {
             List<String> actualGroups = new LinkedList<>(response.getStatus().getUser().getGroups());
-            assertEquals(expectedGroups.length, actualGroups.size());
-            assertThat(actualGroups, containsInAnyOrder(expectedGroups));
+            Assert.assertEquals(expectedGroups.length, actualGroups.size());
+            MatcherAssert.assertThat(actualGroups, IsIterableContainingInAnyOrder.containsInAnyOrder(expectedGroups));
         }
 
     }
