@@ -41,7 +41,12 @@ cd $KEYCLOAK_HOME/bin
 ./kc.sh start-dev --http-port=8180
 ```
 
-Then run the tests against your Keycloak server:
+Make sure you have user `admin` with password `admin` in the realm `master`. It can be created on the welcome page on `http://localhost:8180`
+
+Then run the tests against your Keycloak server.
+
+NOTE: The test will create realm `test` on your Keycloak server and then will delete it after the test. So make sure you don't have realm 
+of this name before running the test:
 
 ```
 mvn test -Dkeycloak.lifecycle=remote
