@@ -19,14 +19,6 @@
     <selenium.version>2.27</selenium.version>
     <surefire-plugin.version>2.12.4</surefire-plugin.version>
 
-    <!--<jakarta.ws.rs.version>3.1.0</jakarta.ws.rs.version>
-    <junit.version>4.13.2</junit.version>
-    <undertow.version>2.2.24.Final</undertow.version>
-    <version.jee.jaxb.api>2.3.1</version.jee.jaxb.api>
-    <arquillian-graphene.version>2.5.4</arquillian-graphene.version>
-    <arquillian-phantom.version>1.2.1.Final</arquillian-phantom.version>
-    <arquillian-screenshooter.version>2.3.2</arquillian-screenshooter.version>-->
-
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
@@ -55,7 +47,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-common</artifactId>
-      <!--<version>${keycloak.version}</version>-->
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -67,7 +58,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-core</artifactId>
-      <!--<version>${keycloak.version}</version>-->
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -79,7 +69,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi</artifactId>
-      <!--<version>${keycloak.version}</version>-->
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -91,7 +80,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-model-legacy</artifactId>
-      <!--<version>${keycloak.version}</version>-->
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -103,7 +91,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <!--<version>2.14.2</version>-->
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -115,7 +102,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <!--<version>2.14.2</version>-->
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -127,7 +113,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-model-legacy-private</artifactId>
-      <!--<version>${keycloak.version}</version>-->
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -139,7 +124,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-server-spi-private</artifactId>
-      <!--<version>${keycloak.version}</version>-->
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -151,7 +135,6 @@
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-services</artifactId>
-      <!--<version>${keycloak.version}</version>-->
       <scope>provided</scope>
       <exclusions>
         <exclusion>
@@ -163,7 +146,6 @@
     <dependency>
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
-      <!--<version>${jakarta.ws.rs.version}</version>-->
     </dependency>
     <dependency>
       <groupId>com.openshift</groupId>
@@ -189,34 +171,32 @@
       </exclusions>
     </dependency>
 
+    <!-- Test dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <!--<version>${junit.version}</version>-->
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-junit5</artifactId>
-      <!--<version>${keycloak.version}</version>-->
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-test-helper</artifactId>
-      <!--<version>${keycloak.version}</version>-->
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.undertow</groupId>
       <artifactId>undertow-core</artifactId>
-      <!--<version>${undertow.version}</version>-->
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>htmlunit-driver</artifactId>
       <version>${selenium.version}</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>
