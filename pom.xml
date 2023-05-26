@@ -15,7 +15,14 @@
     <!-- TODO: Change this to Keycloak 22 once it is released -->
     <keycloak.version>999.0.0-SNAPSHOT</keycloak.version>
 
+    <!-- Openshift client and it's dependencies -->
     <openshift-client.version>9.0.5.Final</openshift-client.version>
+    <okhttp.version>4.10.0</okhttp.version>
+    <okiojvm.version>3.0.0</okiojvm.version>
+    <jbossdmr.version>1.5.1.Final</jbossdmr.version>
+    <commonscompress.version>1.21</commonscompress.version>
+
+    <!-- Test deps -->
     <selenium.version>2.27</selenium.version>
     <surefire-plugin.version>2.12.4</surefire-plugin.version>
 
@@ -206,18 +213,46 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.6.0</version>
         <executions>
           <execution>
             <id>copy-dependencies</id>
             <phase>package</phase>
             <goals>
-              <goal>copy-dependencies</goal>
+              <goal>copy</goal>
             </goals>
             <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.openshift</groupId>
+                  <artifactId>openshift-restclient-java</artifactId>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.squareup.okhttp3</groupId>
+                  <artifactId>okhttp</artifactId>
+                  <version>${okhttp.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.squareup.okio</groupId>
+                  <artifactId>okio-jvm</artifactId>
+                  <version>${okiojvm.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.jboss</groupId>
+                  <artifactId>jboss-dmr</artifactId>
+                  <version>${jbossdmr.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.apache.commons</groupId>
+                  <artifactId>commons-compress</artifactId>
+                  <version>${commonscompress.version}</version>
+                </artifactItem>
+              </artifactItems>
               <outputDirectory>${project.build.directory}/lib</outputDirectory>
               <overWriteReleases>false</overWriteReleases>
               <overWriteSnapshots>false</overWriteSnapshots>
               <overWriteIfNewer>true</overWriteIfNewer>
+              <includeScope>compile</includeScope>
               <excludeScope>provided</excludeScope>
             </configuration>
           </execution>
