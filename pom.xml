@@ -16,14 +16,16 @@
     <keycloak.version>999.0.0-SNAPSHOT</keycloak.version>
 
     <openshift-client.version>9.0.5.Final</openshift-client.version>
-    <jakarta.ws.rs.version>3.1.0</jakarta.ws.rs.version>
-    <junit.version>4.13.2</junit.version>
+    <selenium.version>2.27</selenium.version>
     <surefire-plugin.version>2.12.4</surefire-plugin.version>
+
+    <!--<jakarta.ws.rs.version>3.1.0</jakarta.ws.rs.version>
+    <junit.version>4.13.2</junit.version>
     <undertow.version>2.2.24.Final</undertow.version>
     <version.jee.jaxb.api>2.3.1</version.jee.jaxb.api>
     <arquillian-graphene.version>2.5.4</arquillian-graphene.version>
     <arquillian-phantom.version>1.2.1.Final</arquillian-phantom.version>
-    <arquillian-screenshooter.version>2.3.2</arquillian-screenshooter.version>
+    <arquillian-screenshooter.version>2.3.2</arquillian-screenshooter.version>-->
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
@@ -214,7 +216,7 @@
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>htmlunit-driver</artifactId>
-      <version>2.27</version>
+      <version>${selenium.version}</version>
     </dependency>
 
   </dependencies>
