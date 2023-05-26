@@ -63,6 +63,7 @@ import org.keycloak.protocol.oidc.par.endpoints.ParEndpoint;
 import org.keycloak.protocol.oidc.representations.OIDCConfigurationRepresentation;
 import org.keycloak.protocol.oidc.utils.OIDCResponseType;
 import org.keycloak.representations.AccessToken;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.AuthorizationResponseToken;
 import org.keycloak.representations.ClaimsRepresentation;
 import org.keycloak.representations.IDToken;
@@ -510,6 +511,72 @@ public class OAuthClient {
             throw new RuntimeException("Failed to retrieve access token", e);
         }
     }
+
+    public AccessTokenResponse doGrantAccessTokenRequest(String realm, String username, String password, String totp,
+                                                                                              String clientId, String clientSecret, String scope) throws Exception {
+        try (CloseableHttpClient client = newCloseableHttpClient()) {
+            HttpPost post = new HttpPost(getResourceOwnerPasswordCredentialGrantUrl(realm));
+
+//            if (requestHeaders != null) {
+//                for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
+//                    post.addHeader(header.getKey(), header.getValue());
+//                }
+//            }
+
+            List<NameValuePair> parameters = new LinkedList<>();
+            parameters.add(new BasicNameValuePair(OAuth2Constants.GRANT_TYPE, OAuth2Constants.PASSWORD));
+            parameters.add(new BasicNameValuePair("username", username));
+            parameters.add(new BasicNameValuePair("password", password));
+            if (totp != null) {
+                parameters.add(new BasicNameValuePair("otp", totp));
+
+            }
+
+            TestUtil.addAuth(post, clientId, clientSecret);
+//            if (clientSecret != null) {
+//                String authorization = BasicAuthHelper.createHeader(clientId, clientSecret);
+//                post.setHeader("Authorization", authorization);
+//            } else {
+//                parameters.add(new BasicNameValuePair("client_id", clientId));
+//            }
+
+//            if (origin != null) {
+//                post.addHeader("Origin", origin);
+//            }
+//
+//            if (clientSessionState != null) {
+//                parameters.add(new BasicNameValuePair(AdapterConstants.CLIENT_SESSION_STATE, clientSessionState));
+//            }
+//            if (clientSessionHost != null) {
+//                parameters.add(new BasicNameValuePair(AdapterConstants.CLIENT_SESSION_HOST, clientSessionHost));
+//            }
+
+            String scopeParam = TokenUtil.attachOIDCScope(scope);
+            if (scopeParam != null && !scopeParam.isEmpty()) {
+                parameters.add(new BasicNameValuePair(OAuth2Constants.SCOPE, scopeParam));
+            }
+
+//            if (userAgent != null) {
+//                post.addHeader("User-Agent", userAgent);
+//            }
+
+//            if (customParameters != null) {
+//                customParameters.keySet().stream()
+//                        .forEach(paramName -> parameters.add(new BasicNameValuePair(paramName, customParameters.get(paramName))));
+//            }
+
+            UrlEncodedFormEntity formEntity;
+            try {
+                formEntity = new UrlEncodedFormEntity(parameters, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+            post.setEntity(formEntity);
+
+            return new AccessTokenResponse(client.execute(post));
+        }
+    }
+
 //
 //    // KEYCLOAK-6771 Certificate Bound Token
 //    public String introspectTokenWithClientCredential(String clientId, String clientSecret, String tokenType, String tokenToIntrospect) {

@@ -358,7 +358,7 @@ public class OpenShiftTokenReviewEndpointTest extends AbstractOpenshiftTest {
         public Review invoke() {
             try {
                 if (token == null) {
-                    TestUtil.AccessTokenResponse accessTokenResponse = TestUtil.doGrantAccessTokenRequest("test", username, password, null,
+                    OAuthClient.AccessTokenResponse accessTokenResponse = new OAuthClient().doGrantAccessTokenRequest("test", username, password, null,
                             "direct-grant", "password", scope);
 
                     token = accessTokenResponse.getAccessToken();
