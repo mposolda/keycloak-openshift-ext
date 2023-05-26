@@ -18,4 +18,5 @@ cp target/lib/*.jar $KEYCLOAK_HOME/providers/
 * Fix UserBuilder from Keycloak test helper?
 * Fix test for client storage and make it working
 * Clean-up dependencies - and test manually somehow that both clientStorage and review endpoint works
+* Clean-up (Generic cleanup)
 * Fix README and update instructions with details about Openshift etc.

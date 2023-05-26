@@ -9,6 +9,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.RealmRepresentation;
 
 import static org.keycloak.test.TestsHelper.importTestRealm;
@@ -54,6 +55,10 @@ public abstract class MyTest {
     @After
     public void after() throws IOException {
         TestsHelper.deleteRealm("admin", "admin", "test");
+    }
+
+    protected RealmResource testRealm() {
+        return adminClient.realm("test");
     }
 
     private boolean importTestRealm(String username, String password, String realmJsonPath) throws IOException {

@@ -436,8 +436,4 @@ public class OpenShiftTokenReviewEndpointTest extends MyTest {
         void run(Review i);
     }
 
-    protected RealmResource testRealm() {
-        return adminClient.realm(TEST_REALM_NAME);
-    }
-
 }
