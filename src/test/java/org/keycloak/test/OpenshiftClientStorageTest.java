@@ -17,6 +17,8 @@
 
 package org.keycloak.test;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -33,7 +35,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 //import org.junit.runner.RunWith;
 import org.keycloak.OAuth2Constants;
-import org.keycloak.OAuthErrorException;
 import org.keycloak.admin.client.resource.ComponentResource;
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.common.util.StreamUtil;
@@ -46,7 +47,6 @@ import org.keycloak.storage.client.ClientStorageProvider;
 import org.keycloak.storage.openshift.OpenshiftClientStorageProviderFactory;
 import org.keycloak.test.page.ConsentPage;
 import org.keycloak.test.page.ErrorPage;
-import org.keycloak.test.page.LoginPage;
 import org.keycloak.test.page.MyLoginPage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
@@ -64,7 +64,7 @@ import java.util.Arrays;
  */
 //@RunWith(Arquillian.class)
 //@RunAsClient
-public final class OpenshiftClientStorageTest extends MyTest {
+public final class OpenshiftClientStorageTest extends AbstractOpenshiftTest {
 
     private static Undertow OPENSHIFT_API_SERVER;
 
@@ -165,7 +165,17 @@ public final class OpenshiftClientStorageTest extends MyTest {
         clientStorageId = TestsHelper.getCreatedId(resp);
 
         // Manually init selenium and pages
-        driver = new HtmlUnitDriver();
+        driver = new HtmlUnitDriver() {
+
+            @Override
+            protected WebClient newWebClient(BrowserVersion version) {
+                WebClient superr = super.newWebClient(version);
+                superr.getOptions().setCssEnabled(false);
+                return superr;
+            }
+
+        };
+
         oauth = new OAuthClient();
         oauth.init(driver);
         loginPage = new MyLoginPage();

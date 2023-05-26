@@ -72,7 +72,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-public class OpenShiftTokenReviewEndpointTest extends MyTest {
+public class OpenShiftTokenReviewEndpointTest extends AbstractOpenshiftTest {
 
     @Override
     public void configureTestRealm(RealmRepresentation testRealm) {

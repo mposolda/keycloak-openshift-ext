@@ -9,24 +9,21 @@ import org.keycloak.common.Version;
 /**
  * @author <a href="mailto:mposolda@redhat.com">Marek Posolda</a>
  */
-public class KcLifecycle {
+public class KeycloakLifecycle {
 
     private static final String KEYCLOAK_VERSION = Version.VERSION;
 
+    // TODO: Read from pom if needed (For instance like org.keycloak.common.Version)
+    private static final String MY_VERSION = "1.0-SNAPSHOT";
+
     private static final int HTTP_PORT = 8180;
     private static final int HTTPS_PORT = 8543;
-
-    // Used by KeycloakMain class
-    private static final String KEYCLOAK_ADMIN_ENV_VAR = "KEYCLOAK_ADMIN";
-    private static final String KEYCLOAK_ADMIN_PASSWORD_ENV_VAR = "KEYCLOAK_ADMIN_PASSWORD";
 
     private Keycloak keycloak;
 
     public void start() {
         try {
             keycloak = configure().start(getArgs());
-
-            // TODO:mposolda uncomment and implement
             // waitForReadiness();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -36,10 +33,6 @@ public class KcLifecycle {
     private List<String> getArgs() {
         System.setProperty("quarkus.http.test-port", String.valueOf(HTTP_PORT));
         System.setProperty("quarkus.http.test-ssl-port", String.valueOf(HTTPS_PORT));
-
-        // TODO:mposolda drop this?
-//        TestUtil.setEnvVariable(KEYCLOAK_ADMIN_ENV_VAR, "admin");
-//        TestUtil.setEnvVariable(KEYCLOAK_ADMIN_PASSWORD_ENV_VAR, "admin");
 
         return Arrays.asList("-v",
                 "start-dev",
@@ -61,9 +54,8 @@ public class KcLifecycle {
 
     private Keycloak.Builder configure() {
         return Keycloak.builder()
-                // TODO:mposolda do we need this?
                 //.setHomeDir(configuration.getProvidersPath())
                 .setVersion(KEYCLOAK_VERSION)
-                .addDependency("org.keycloak.ext", "openshift-ext", "1.0-SNAPSHOT");
+                .addDependency("org.keycloak.ext", "openshift-ext", MY_VERSION);
     }
 }

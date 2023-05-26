@@ -15,13 +15,12 @@ import org.keycloak.representations.idm.RealmRepresentation;
 import static org.keycloak.test.TestsHelper.importTestRealm;
 
 /**
- * TODO:mposolda rename this class?
  *
  * @author <a href="mailto:mposolda@redhat.com">Marek Posolda</a>
  */
-public abstract class MyTest {
+public abstract class AbstractOpenshiftTest {
 
-    private static KcLifecycle keycloak;
+    private static KeycloakLifecycle keycloak;
 
     protected static Keycloak adminClient;
 
@@ -30,7 +29,7 @@ public abstract class MyTest {
     @BeforeClass
     public static void beforeMe() throws IOException {
         System.out.println("BEFORE");
-        keycloak = new KcLifecycle();
+        keycloak = new KeycloakLifecycle();
         keycloak.start();
 
         adminClient = Keycloak.getInstance(TestsHelper.keycloakBaseUrl, "master", "admin", "admin", "admin-cli");
