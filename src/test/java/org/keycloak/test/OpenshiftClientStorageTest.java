@@ -68,8 +68,6 @@ public final class OpenshiftClientStorageTest extends AbstractOpenshiftTest {
 
     private static Undertow OPENSHIFT_API_SERVER;
 
-    private static OpenshiftClientStorageTest instance;
-
     // @Drone
     protected WebDriver driver;
 
@@ -141,10 +139,6 @@ public final class OpenshiftClientStorageTest extends AbstractOpenshiftTest {
         if (OPENSHIFT_API_SERVER != null) {
             OPENSHIFT_API_SERVER.stop();
         }
-
-//        if (instance != null) {
-//            instance.driver.close();
-//        }
     }
 
     @Before
@@ -163,6 +157,7 @@ public final class OpenshiftClientStorageTest extends AbstractOpenshiftTest {
         Response resp = adminClient.realm("test").components().add(provider);
         resp.close();
         clientStorageId = TestsHelper.getCreatedId(resp);
+        userId = TestUtil.findUserByUsername(adminClient.realm("test"), "test-user@localhost").getId();
 
         // Manually init selenium and pages
         driver = new HtmlUnitDriver() {
@@ -175,7 +170,6 @@ public final class OpenshiftClientStorageTest extends AbstractOpenshiftTest {
             }
 
         };
-
         oauth = new OAuthClient();
         oauth.init(driver);
         loginPage = new MyLoginPage();
@@ -189,11 +183,6 @@ public final class OpenshiftClientStorageTest extends AbstractOpenshiftTest {
     @After
     public void afterWards() {
         driver.close();
-    }
-
-    @Before
-    public void clientConfiguration() {
-        userId = TestUtil.findUserByUsername(adminClient.realm("test"), "test-user@localhost").getId();
     }
 
     @Test

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jboss.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -12,13 +13,13 @@ import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.RealmRepresentation;
 
-import static org.keycloak.test.TestsHelper.importTestRealm;
-
 /**
  *
  * @author <a href="mailto:mposolda@redhat.com">Marek Posolda</a>
  */
 public abstract class AbstractOpenshiftTest {
+
+    protected static final Logger logger = Logger.getLogger(AbstractOpenshiftTest.class);
 
     private static KeycloakLifecycle keycloak;
 
@@ -28,22 +29,19 @@ public abstract class AbstractOpenshiftTest {
 
     @BeforeClass
     public static void beforeMe() throws IOException {
-        System.out.println("BEFORE");
+        logger.info("Starting Keycloak server");
         keycloak = new KeycloakLifecycle();
         keycloak.start();
+        logger.info("Started Keycloak server");
 
         adminClient = Keycloak.getInstance(TestsHelper.keycloakBaseUrl, "master", "admin", "admin", "admin-cli");
-
-        System.out.println("START KEYCLOAK FINISHED");
     }
 
     @AfterClass
     public static void afterMe() throws IOException {
-        System.out.println("AFTER CLASS");
-
+        logger.info("Going to stop Keycloak server");
         keycloak.stop();
-
-        System.out.println("STOP KEYCLOAK FINISHED");
+        System.out.println("Keycloak server stopped");
     }
 
     @Before

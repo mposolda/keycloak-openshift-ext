@@ -23,7 +23,11 @@ public class KeycloakLifecycle {
 
     public void start() {
         try {
-            keycloak = configure().start(getArgs());
+            keycloak = Keycloak.builder()
+                    //.setHomeDir(configuration.getProvidersPath())
+                    .setVersion(KEYCLOAK_VERSION)
+                    .addDependency("org.keycloak.ext", "openshift-ext", MY_VERSION)
+                    .start(getArgs());
             // waitForReadiness();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -50,12 +54,5 @@ public class KeycloakLifecycle {
                 keycloak = null;
             }
         }
-    }
-
-    private Keycloak.Builder configure() {
-        return Keycloak.builder()
-                //.setHomeDir(configuration.getProvidersPath())
-                .setVersion(KEYCLOAK_VERSION)
-                .addDependency("org.keycloak.ext", "openshift-ext", MY_VERSION);
     }
 }
