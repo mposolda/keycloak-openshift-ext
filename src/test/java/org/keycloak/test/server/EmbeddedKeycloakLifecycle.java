@@ -1,16 +1,20 @@
-package org.keycloak.test;
+package org.keycloak.test.server;
 
 import java.util.Arrays;
 import java.util.List;
 
+import org.jboss.logging.Logger;
 import org.keycloak.Keycloak;
 import org.keycloak.common.Version;
 
 /**
+ * Run embedded Keycloak-on-quarkus server before the test-class and stop it after each test-class
+ *
  * @author <a href="mailto:mposolda@redhat.com">Marek Posolda</a>
  */
-public class KeycloakLifecycle {
+public class EmbeddedKeycloakLifecycle implements KeycloakLifecycle {
 
+    private static final Logger logger = Logger.getLogger(EmbeddedKeycloakLifecycle.class);
     private static final String KEYCLOAK_VERSION = Version.VERSION;
 
     // TODO: Read from pom if needed (For instance like org.keycloak.common.Version)
@@ -21,7 +25,10 @@ public class KeycloakLifecycle {
 
     private Keycloak keycloak;
 
+    @Override
     public void start() {
+        logger.info("Starting embedded Keycloak server");
+
         try {
             keycloak = Keycloak.builder()
                     //.setHomeDir(configuration.getProvidersPath())
@@ -32,6 +39,8 @@ public class KeycloakLifecycle {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
+        logger.info("Started embedded Keycloak server");
     }
 
     private List<String> getArgs() {
@@ -44,8 +53,11 @@ public class KeycloakLifecycle {
                 "--cache=local");
     }
 
+    @Override
     public void stop() {
         if (keycloak != null) {
+            logger.info("Going to stop embedded Keycloak server");
+
             try {
                 keycloak.stop();
             } catch (Exception e) {
@@ -53,6 +65,7 @@ public class KeycloakLifecycle {
             } finally {
                 keycloak = null;
             }
+            logger.info("Keycloak server stopped");
         }
     }
 }

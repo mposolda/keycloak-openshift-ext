@@ -21,6 +21,8 @@
     <okiojvm.version>3.0.0</okiojvm.version>
     <jbossdmr.version>1.5.1.Final</jbossdmr.version>
     <commonscompress.version>1.21</commonscompress.version>
+    <commonslang.version>2.6</commonslang.version>
+    <kotlin.version>1.8.10</kotlin.version>
 
     <!-- Test deps -->
     <selenium.version>2.27</selenium.version>
@@ -246,6 +248,16 @@
                   <groupId>org.apache.commons</groupId>
                   <artifactId>commons-compress</artifactId>
                   <version>${commonscompress.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>commons-lang</groupId>
+                  <artifactId>commons-lang</artifactId>
+                  <version>${commonslang.version}</version>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.jetbrains.kotlin</groupId>
+                  <artifactId>kotlin-stdlib</artifactId>
+                  <version>${kotlin.version}</version>
                 </artifactItem>
               </artifactItems>
               <outputDirectory>${project.build.directory}/lib</outputDirectory>
