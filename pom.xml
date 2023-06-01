@@ -27,6 +27,7 @@
     <!-- Test deps -->
     <selenium.version>2.27</selenium.version>
     <surefire-plugin.version>2.12.4</surefire-plugin.version>
+    <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
@@ -282,4 +283,24 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>http-challenge-create</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>${exec.maven.plugin.version}</version>
+            <configuration>
+              <mainClass>org.keycloak.test.HttpChallengeFlowHelper</mainClass>
+              <classpathScope>test</classpathScope>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>

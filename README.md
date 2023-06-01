@@ -1,9 +1,14 @@
 # OpenShift integration extension for Keycloak
 
-Experimental extension to Keycloak that supports replacing the internal OpenShift identity provider with Keycloak. There's two core parts to this extension:
+NOTE: This extension is not officially supported by Keycloak team. In case of troubles, you can ask on keycloak-user mailing list
+rather create pull request to improve this extension (if you find some issues etc).
+
+Experimental extension to Keycloak that supports replacing the internal OpenShift identity provider with Keycloak. There's three core parts to this extension:
 
 * Token review endpoint: custom token introspection endpoint for OpenShift
 * Client federation: ability to federate OAuth clients registered in OpenShift
+* Http challenge authenticators: authenticator implementations, which can be used to create the "Http challenge" authentication flow, which then can be used by
+Keycloak clients, which are supposed to integrate with Openshift server
 
 NOTE: The code from this extension was part of the Keycloak main codebase until Keycloak 21 and was available as a preview feature `openshift-integration`.
 From Keycloak 22, the `openshift-integration` preview feature was moved to this extension. 
@@ -25,7 +30,7 @@ on your laptop on this port:
 mvn clean install
 ```
 
-After it is done, you can copy built files and required dependencies to Keycloak server:
+After it is done, you can copy built files and required dependencies to your Keycloak server:
 ```
 cp target/openshift-ext-1.0-SNAPSHOT.jar $KEYCLOAK_HOME/providers/
 cp target/lib/*.jar $KEYCLOAK_HOME/providers/
@@ -51,6 +56,20 @@ of this name before running the test:
 ```
 mvn test -Dkeycloak.lifecycle=remote
 ```
+
+## Create HTTP Challenge authentication flow
+
+Previous versions of Keycloak (Keycloak 21 and older) contain the authentication flow called `http challenge`, which was removed from Keycloak in
+Keycloak 22 release. The corresponding authenticators were moved to this extension. If you want the `http challenge` authentication flow to be added
+again to your Keycloak server, then you need to have this extension deployed. As long as you did previous steps, you can use this command to automatically create the `Http Challenge`
+flow in your specified realm (in this example realm with name `foo` is used):
+
+```
+mvn exec:java -Phttp-challenge-create -DrealmName=foo
+```
+
+In case you prefer to create authentication flow manually, you can take a look at [img/http-challenge-flow.png](img/http-challenge-flow.png) 
+to see how it looked in previous version. Then you can do your own customizations to the flow if needed, for example if you need OTP or Kerberos/SPNEGO authentication.
 
 ## How to make this working against OpenShift server
 

@@ -1,0 +1,3 @@
+org.keycloak.authentication.authenticators.challenge.BasicAuthAuthenticatorFactory
+org.keycloak.authentication.authenticators.challenge.BasicAuthOTPAuthenticatorFactory
+org.keycloak.authentication.authenticators.challenge.NoCookieFlowRedirectAuthenticatorFactory

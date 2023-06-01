@@ -82,6 +82,7 @@ public abstract class AbstractOpenshiftTest {
 
     protected void sleep(long ms) {
         try {
+            System.err.println("Sleeping");
             Thread.sleep(ms);
         } catch (InterruptedException ie) {
             throw new RuntimeException(ie);
